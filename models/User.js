@@ -59,6 +59,17 @@ const User = sequelize.define('User', {
     type: DataTypes.TEXT,
     allowNull: true,
     field: 'cv_summary'
+  },
+  // Password reset fields
+  resetPasswordToken: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: 'reset_password_token'
+  },
+  resetPasswordExpires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    field: 'reset_password_expires'
   }
 }, {
   tableName: 'Users',

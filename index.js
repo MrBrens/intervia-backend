@@ -278,6 +278,34 @@ app.post('/api/logout', authMiddleware, async (req, res) => {
   }
 });
 
+// Password reset request route
+app.post('/api/reset-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: 'Email requis.' });
+  }
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (user) {
+      // Generate token and expiry (1 hour)
+      const crypto = require('crypto');
+      const token = crypto.randomBytes(32).toString('hex');
+      const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      user.resetPasswordToken = token;
+      user.resetPasswordExpires = expires;
+      await user.save();
+      // Log the reset link (replace with email logic as needed)
+      const resetLink = `https://your-frontend-domain/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+      console.log(`🔗 Password reset link for ${email}: ${resetLink}`);
+    }
+    // Always respond with success for security
+    res.json({ message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' });
+  } catch (error) {
+    console.error('Erreur lors de la demande de réinitialisation du mot de passe:', error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 // ✅ Middleware de protection (authMiddleware)
 function authMiddleware(req, res, next) {
   try {
@@ -1105,3 +1133,32 @@ app.use('/api/payments', paymentRoutes);
 
 // Add admin routes
 app.use('/api/admin', adminRoutes);
+
+// Temporary route to test SMTP configuration
+const nodemailer = require('nodemailer');
+app.post('/api/test-smtp', async (req, res) => {
+  const { to } = req.body;
+  if (!to) return res.status(400).json({ message: 'Missing recipient email (to)' });
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT, 10),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+    await transporter.sendMail({
+      from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_FROM_EMAIL}>`,
+      to,
+      subject: 'Test SMTP',
+      text: 'This is a test email from your Interv-ia backend SMTP config.',
+      html: '<b>This is a test email from your Interv-ia backend SMTP config.</b>',
+    });
+    res.json({ message: 'Test email sent successfully!' });
+  } catch (error) {
+    console.error('SMTP test error:', error);
+    res.status(500).json({ message: 'SMTP test failed', error: error.message });
+  }
+});
