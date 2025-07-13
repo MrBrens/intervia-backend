@@ -51,7 +51,8 @@ const corsOptions = {
       'https://fa10-165-51-104-50.ngrok-free.app',
       'https://hong-edmonton-tolerance-negotiations.trycloudflare.com',
       'https://speaker-weekends-pete-retrieve.trycloudflare.com',
-      'https://sends-processor-preview-net.trycloudflare.com'
+      'https://sends-processor-preview-net.trycloudflare.com',
+      'https://www.interv-ia.com/' // ← Add this line
     ];
     
     // Add environment variable origins if provided
