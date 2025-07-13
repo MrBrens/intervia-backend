@@ -52,7 +52,7 @@ const corsOptions = {
       'https://hong-edmonton-tolerance-negotiations.trycloudflare.com',
       'https://speaker-weekends-pete-retrieve.trycloudflare.com',
       'https://sends-processor-preview-net.trycloudflare.com',
-      'https://www.interv-ia.com/' // ← Add this line
+      'https://www.interv-ia.com' // <--- without trailing slash
     ];
     
     // Add environment variable origins if provided
