@@ -306,6 +306,32 @@ app.post('/api/reset-password', async (req, res) => {
   }
 });
 
+// Password reset confirmation route
+app.post('/api/reset-password/confirm', async (req, res) => {
+  const { email, token, newPassword } = req.body;
+  if (!email || !token || !newPassword) {
+    return res.status(400).json({ message: 'Paramètres manquants.' });
+  }
+  try {
+    const user = await User.findOne({ where: { email, resetPasswordToken: token } });
+    if (!user) {
+      return res.status(400).json({ message: 'Lien de réinitialisation invalide ou expiré.' });
+    }
+    if (!user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+      return res.status(400).json({ message: 'Lien de réinitialisation expiré.' });
+    }
+    // Update password and clear reset token
+    user.password = newPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+    res.json({ message: 'Mot de passe réinitialisé avec succès.' });
+  } catch (error) {
+    console.error('Erreur lors de la confirmation de réinitialisation du mot de passe:', error);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+});
+
 // ✅ Middleware de protection (authMiddleware)
 function authMiddleware(req, res, next) {
   try {
